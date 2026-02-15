@@ -1,4 +1,4 @@
-package com.brevityai.backend.controller;
+package com.brevityai.backend.whisper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,8 +19,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
-
-import static java.awt.SystemColor.text;
 
 @RestController
 @RequestMapping("/api/stt")

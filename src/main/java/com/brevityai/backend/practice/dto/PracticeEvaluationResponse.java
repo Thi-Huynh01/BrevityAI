@@ -1,4 +1,4 @@
-package com.brevityai.backend.dto;
+package com.brevityai.backend.practice.dto;
 
 import lombok.Getter;
 

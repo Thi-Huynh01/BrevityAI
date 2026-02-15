@@ -1,6 +1,5 @@
-package com.brevityai.backend.controller;
+package com.brevityai.backend.whisper;
 
-import com.brevityai.backend.service.WhisperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

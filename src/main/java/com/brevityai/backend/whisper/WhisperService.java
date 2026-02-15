@@ -1,4 +1,4 @@
-package com.brevityai.backend.service;
+package com.brevityai.backend.whisper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +10,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
-
 
 @Service
 public class WhisperService {

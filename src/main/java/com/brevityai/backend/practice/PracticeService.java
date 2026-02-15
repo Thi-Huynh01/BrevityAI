@@ -1,7 +1,7 @@
-package com.brevityai.backend.service;
+package com.brevityai.backend.practice;
 
-import com.brevityai.backend.dto.PracticeEvaluationResponse;
-import com.brevityai.backend.dto.PracticePromptResponse;
+import com.brevityai.backend.practice.dto.PracticeEvaluationResponse;
+import com.brevityai.backend.practice.dto.PracticePromptResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
