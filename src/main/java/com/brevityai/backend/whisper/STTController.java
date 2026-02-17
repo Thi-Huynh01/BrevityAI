@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
 
+//TEST CLASS - testing the whisper connection and transcribing.
+
 @RestController
 @RequestMapping("/api/stt")
 public class STTController {
@@ -56,6 +58,7 @@ public class STTController {
         }
     }
 
+    // Helper function for HttpRequest builder
     public static HttpRequest.BodyPublisher ofMimeMultipart(File file, String boundary) throws IOException {
         var byteArrays = new java.util.ArrayList<byte[]>();
 

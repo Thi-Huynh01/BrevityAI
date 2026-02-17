@@ -22,7 +22,7 @@ public class LLMService {
           "messages": [
             {
               "role": "system",
-              "content": "You are a Vietnamese pronunciation tutor."
+              "content": "You are a Vietnamese pronunciation tutor. You MUST respond ONLY with valid JSON. No extra text."
             },
             {
               "role": "user",
@@ -32,6 +32,7 @@ public class LLMService {
         }
         """.formatted(transcript, expected);
 
+        // Build HTTP request
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/chat/completions"))
                 .header("Authorization", "Bearer " + apiKey)
@@ -50,7 +51,6 @@ public class LLMService {
             throw new RuntimeException("OpenAI Error: " + node.get("error").get("message").asText());
         }
 
-        // Safe extraction
         JsonNode choices = node.get("choices");
         if (choices == null || !choices.isArray() || choices.isEmpty()) {
             throw new RuntimeException("Invalid OpenAI response: " + response.body());
@@ -64,6 +64,7 @@ public class LLMService {
         JsonNode feedback = mapper.readTree(content);
         EvaluationResult result = new EvaluationResult();
 
+        // Set DTO so that it can be parsed as JSON
         result.setScore(feedback.get("score").asInt());
         result.setMistakes(feedback.get("mistakes").asText());
         result.setAccuracy(feedback.get("accuracy").asText());

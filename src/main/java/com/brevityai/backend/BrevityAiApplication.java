@@ -1,6 +1,8 @@
 package com.brevityai.backend;
 
 import ch.qos.logback.core.net.SyslogOutputStream;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,6 +11,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.Key;
+import java.util.Base64;
 
 @SpringBootApplication
 public class BrevityAiApplication {
@@ -16,6 +20,9 @@ public class BrevityAiApplication {
     public static void main(String[] args) throws IOException, InterruptedException {
 
         SpringApplication.run(BrevityAiApplication.class, args);
+//        Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+//        String base64Key = Base64.getEncoder().encodeToString(key.getEncoded());
+//        System.out.println(base64Key);
 
         // Testing OpenAI key
 //
