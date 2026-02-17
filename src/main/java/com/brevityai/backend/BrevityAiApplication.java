@@ -18,7 +18,6 @@ import java.util.Base64;
 public class BrevityAiApplication {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-
         SpringApplication.run(BrevityAiApplication.class, args);
 //        Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 //        String base64Key = Base64.getEncoder().encodeToString(key.getEncoded());
