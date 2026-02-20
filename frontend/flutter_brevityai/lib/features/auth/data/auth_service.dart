@@ -1,7 +1,7 @@
 import '../../../core/services/api_service.dart';
 
 class AuthService {
-  Future<String> login(String username, String password) async {
+  Future<String?> login(String username, String password) async {
 
     try {
       final response = await ApiService.post("/api/auth/login", {
@@ -9,10 +9,17 @@ class AuthService {
       "password": password, 
       });
 
-      return response["token"];
+      
+      if (response["token"] != null) {
+        return response["token"];
+      } else {
+        return null;
+      }
+    
+      //return response["token"];
     } catch (e) {
       print ("Login Error: $e");
-      return "";
+      return null;
     }
   } 
 }

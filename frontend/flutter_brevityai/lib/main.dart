@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'features/auth/provider/auth_provider.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/home_screen.dart';
+import 'features/auth/presentation/screens/slash_screen.dart';
 
 void main() {
   runApp(
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
       title: 'BrevityAI',
       initialRoute: '/', 
       routes: {
-        '/': (context) => const LoginScreen(),
+        '/': (context) => const SplashScreen(),
+        '/login': (context) => const LoginScreen(),
         '/home':(context) => const HomeScreen(),
       },
     );

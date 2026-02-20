@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/auth_provider.dart';
-import '../../../../core/services/auth_service.dart';
+//import '../../../../core/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,34 +13,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final AuthService authService = AuthService();
-
-  bool isLoading = false;
-  String errorMessage = '';
-
-  void login() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = '';
-    });
-    
-    bool success = await authService.login(
-      usernameController.text,
-      passwordController.text,
-    );
-    setState(() {
-      isLoading = false;
-    });
-
-    if (success) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      setState(() {
-        errorMessage = 'Invalid username or password';
-      });
-    }
-  }
-
+  //final AuthService authService = AuthService();
+  
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -72,13 +46,20 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 20),
 
-            ElevatedButton(onPressed: authProvider.isLoading ? null
+            ElevatedButton(onPressed: authProvider.isLoading 
+            ? null
             : () async {
-              await authProvider.login(usernameController.text, passwordController.text,);
+              
+              final success = await authProvider.login(
+                usernameController.text,
+                passwordController.text,
+              );
 
-              if (authProvider.token != null) {
+              if (success) {
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Login Success")),
+                  const SnackBar(content: Text("Login failed")),
                 );
               }
             },
