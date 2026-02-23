@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_brevityai/features/practice/presentation/screens/practice_screen.dart';
 import 'package:provider/provider.dart';
 
 
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/home':(context) => const HomeScreen(),
+        '/practice':(context) => const PracticeScreen(),
       },
     );
   }

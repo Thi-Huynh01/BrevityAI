@@ -14,10 +14,10 @@ class HomeScreen extends StatelessWidget{
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
-          await authProvider.logout();
-          Navigator.pushReplacementNamed(context, '/login');
+          //await authProvider.logout();
+          Navigator.pushReplacementNamed(context, '/practice');
         },
-          child: const Text("Logout"),
+          child: const Text("practice"),
         ),
       )
     );
