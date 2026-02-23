@@ -43,7 +43,7 @@ public class PracticeController {
             @RequestParam("expected") String expected
     ) {
         try {
-            File tempFile = File.createTempFile("audio", ".wav");
+            File tempFile = File.createTempFile("audio", ".m4a");
             file.transferTo(tempFile);
 
             // Get the current logged-in user
