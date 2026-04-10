@@ -3,11 +3,14 @@ import com.brevityai.backend.attempt.Attempt;
 import com.brevityai.backend.attempt.AttemptRepository;
 import com.brevityai.backend.llm.LLMService;
 import com.brevityai.backend.practice.dto.EvaluationResult;
+import com.brevityai.backend.practice.dto.GenerationResponse;
+import com.brevityai.backend.practice.dto.GenerationResult;
 import com.brevityai.backend.practice.dto.PracticeResponse;
 import com.brevityai.backend.user.User;
 import com.brevityai.backend.user.UserRepository;
 import com.brevityai.backend.whisper.WhisperService;
 import com.brevityai.backend.attempt.dto.AttemptResponse;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/practice")
@@ -37,14 +40,28 @@ public class PracticeController {
         this.userRepository = userRepository;
     }
 
+    //Endpoint mainly for testing
+    @PostMapping("/generate")
+    public ResponseEntity<?> generateSentence(@RequestParam("difficulty") String difficulty) {
+        try {
+            GenerationResult sentence = llmService.generateUniqueSentence(difficulty);
+
+            return ResponseEntity.ok(new GenerationResponse(sentence.getActualSentence(), sentence.getTranslated()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> practice (
             @RequestParam("file") MultipartFile file,
-            @RequestParam("expected") String expected
+            @RequestParam("difficulty") String difficulty
     ) {
         try {
-            File tempFile = File.createTempFile("audio", ".m4a");
+            File tempFile = File.createTempFile("audio", ".m4a"); // may need to turn to .wav
             file.transferTo(tempFile);
+            GenerationResult expected = llmService.generateSentence(difficulty);
 
             // Get the current logged-in user
             String user = (String) Objects.requireNonNull(
@@ -58,13 +75,13 @@ public class PracticeController {
 
             // send audio to Whisper and then transcript to LLM to evaluate
             String transcript = whisperService.transcribeAudio(tempFile);
-            EvaluationResult feedback = llmService.evaluate(transcript, expected);
+            EvaluationResult feedback = llmService.evaluate(transcript, expected.getActualSentence());
 
             // Save to postgres db
             Attempt attempt = new Attempt();
 
             attempt.setUser(currentUser);
-            attempt.setExpectedText(expected);
+            attempt.setExpectedText(expected.getActualSentence());
             attempt.setTranscript(transcript);
             attempt.setScore(feedback.getScore());
             attempt.setAccuracy(feedback.getAccuracy());
@@ -74,7 +91,7 @@ public class PracticeController {
             attemptRepository.save(attempt);
             System.out.println("Saved Attempt ID: " + attempt.getId());
 
-            return ResponseEntity.ok(new PracticeResponse(transcript, feedback));
+            return ResponseEntity.ok(new PracticeResponse(transcript, expected.getActualSentence(),feedback));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(e.getMessage());
@@ -82,7 +99,6 @@ public class PracticeController {
     }
 
     @GetMapping("/history")
-
     public ResponseEntity<?> getHistory() {
         try {
             // get current user

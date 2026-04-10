@@ -7,5 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 public class PracticeResponse {
     private String transcript;
+    private String expected;
     private EvaluationResult evaluation;
 }

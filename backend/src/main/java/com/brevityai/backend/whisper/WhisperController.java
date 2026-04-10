@@ -20,7 +20,7 @@ public class WhisperController {
 
     @PostMapping
     public ResponseEntity<?> transcribe(@RequestParam("file") MultipartFile file) throws Exception {
-        var tempFile = File.createTempFile("audio", ".m4a");
+        var tempFile = File.createTempFile("audio", ".wav");
         file.transferTo(tempFile);
 
         String transcript = whisperService.transcribeAudio(tempFile);
