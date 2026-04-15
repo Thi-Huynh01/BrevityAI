@@ -10,6 +10,7 @@ import com.brevityai.backend.user.User;
 import com.brevityai.backend.user.UserRepository;
 import com.brevityai.backend.whisper.WhisperService;
 import com.brevityai.backend.attempt.dto.AttemptResponse;
+import lombok.*;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,29 +25,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/practice")
+@Data
+@RequiredArgsConstructor
 public class PracticeController {
     private final LLMService llmService;
     private final WhisperService whisperService;
     private final AttemptRepository attemptRepository;
     private final UserRepository userRepository;
-
-    public PracticeController(LLMService llmService,
-                              WhisperService whisperService,
-                              AttemptRepository attemptRepository, UserRepository userRepository) {
-
-        this.llmService = llmService;
-        this.whisperService = whisperService;
-        this.attemptRepository = attemptRepository;
-        this.userRepository = userRepository;
-    }
+    private GenerationResult generationResult;
 
     //Endpoint mainly for testing
-    @PostMapping("/generate")
-    public ResponseEntity<?> generateSentence(@RequestParam("difficulty") String difficulty) {
+    @GetMapping("/generate")
+    public ResponseEntity<?> generateSentence(@RequestParam(defaultValue = "easy") String difficulty) {
         try {
-            GenerationResult sentence = llmService.generateUniqueSentence(difficulty);
-
-            return ResponseEntity.ok(new GenerationResponse(sentence.getActualSentence(), sentence.getTranslated()));
+            generationResult = llmService.generateUniqueSentence(difficulty);
+            return ResponseEntity.ok(new GenerationResponse(generationResult.getActualSentence(), generationResult.getTranslated()));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(e.getMessage());
@@ -56,12 +49,12 @@ public class PracticeController {
     @PostMapping
     public ResponseEntity<?> practice (
             @RequestParam("file") MultipartFile file,
-            @RequestParam("difficulty") String difficulty
+            @RequestParam(defaultValue = "easy") String difficulty
     ) {
         try {
             File tempFile = File.createTempFile("audio", ".m4a"); // may need to turn to .wav
             file.transferTo(tempFile);
-            GenerationResult expected = llmService.generateSentence(difficulty);
+            //GenerationResult expected = generationResult;
 
             // Get the current logged-in user
             String user = (String) Objects.requireNonNull(
@@ -75,13 +68,13 @@ public class PracticeController {
 
             // send audio to Whisper and then transcript to LLM to evaluate
             String transcript = whisperService.transcribeAudio(tempFile);
-            EvaluationResult feedback = llmService.evaluate(transcript, expected.getActualSentence());
+            EvaluationResult feedback = llmService.evaluate(transcript, generationResult.getActualSentence());
 
             // Save to postgres db
             Attempt attempt = new Attempt();
 
             attempt.setUser(currentUser);
-            attempt.setExpectedText(expected.getActualSentence());
+            attempt.setExpectedText(generationResult.getActualSentence());
             attempt.setTranscript(transcript);
             attempt.setScore(feedback.getScore());
             attempt.setAccuracy(feedback.getAccuracy());
@@ -91,7 +84,7 @@ public class PracticeController {
             attemptRepository.save(attempt);
             System.out.println("Saved Attempt ID: " + attempt.getId());
 
-            return ResponseEntity.ok(new PracticeResponse(transcript, expected.getActualSentence(),feedback));
+            return ResponseEntity.ok(new PracticeResponse(transcript, generationResult.getActualSentence(),feedback));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(e.getMessage());

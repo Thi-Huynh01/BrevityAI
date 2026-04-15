@@ -4,7 +4,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class PracticeService {
-  final String baseUrl = "http://10.0.2.2:8080/api";
+  final String baseUrl = "http://192.168.1.212:8080/api";
+  //final String baseUrl = "http://192.168.1.20:8080/api";
 
   Future<Map<String, dynamic>> sendPractice({
     required String filePath,
@@ -37,5 +38,14 @@ class PracticeService {
     } else {
       throw Exception("Practice upload failed: ${response.statusCode} - $responseBody");
     }
+  }
+  Future<Map<String,dynamic>> getSentence({required String token}) async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/practice/generate?difficulty=easy"),
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+    return jsonDecode(response.body);
   }    
 }

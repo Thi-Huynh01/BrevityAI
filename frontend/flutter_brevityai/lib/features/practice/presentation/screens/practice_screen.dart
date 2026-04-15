@@ -18,9 +18,31 @@ class _PracticeScreenState extends State<PracticeScreen> {
   bool isRecording = false;
   bool isLoading = false;
   String transcribedText = "";
+  String expectedSentence = "";
   Map<String, dynamic>? feedback;
 
-  final TextEditingController expectedController = TextEditingController();
+  Future<void> fetchSentence() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen:false);
+
+    try {
+      final result = await practiceService.getSentence(
+        token: authProvider.token!,
+      );
+      setState(() {
+        expectedSentence = result['sentence'] ?? "";
+      });
+    } catch(e) {
+      setState(() {
+        expectedSentence = "Error Loading Sentence";
+      });
+    }
+  }
+
+  Future<void> logout() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.logout();
+    Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
+  }
 
   // Toggle recording and send audio to backend when stopped
   void toggleRecording() async {
@@ -42,13 +64,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
         try {
           final result = await practiceService.sendPractice(
             filePath: path,
-            expected: "Xin chào",//expectedController.text,
+            expected: expectedSentence,//expectedController.text,
             token: authProvider.token!,
           );
 
           setState(() {
             transcribedText = result['transcript'] ?? "";
-            feedback = result['feedback'];
+            feedback = result['evaluation'];
           });
         } catch (e) {
           setState(() {
@@ -64,28 +86,43 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   @override
   void dispose() {
-    expectedController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSentence();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Practice Speaking")),
+      appBar: AppBar(title: const Text("Practice Speaking"),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: logout,
+        ),
+      ],
+    ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Expected sentence input
-            TextField(
-              controller: expectedController,
-              decoration: const InputDecoration(
-                labelText: "Expected sentence",
-              ),
+            IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: fetchSentence,
             ),
-            const SizedBox(height: 20),
-
+            // Expected sentence input
+            Text(
+              expectedSentence.isEmpty
+              ? "Loading sentence..."
+              : expectedSentence,
+              style: const TextStyle(fontSize:20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
             // Display transcript or instructions
             Text(
               transcribedText.isEmpty

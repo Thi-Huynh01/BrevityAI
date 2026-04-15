@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseURL = "http://10.0.2.2:8080";
+  static const String baseURL = "http://192.168.1.212:8080";
+  //static const String baseURL = "http://192.168.1.20:8080";
 
   static Future<Map<String, dynamic>> post (
     String endpoint, Map<String, dynamic> data) async {
