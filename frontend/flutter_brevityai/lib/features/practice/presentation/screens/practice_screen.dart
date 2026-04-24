@@ -29,11 +29,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
         token: authProvider.token!,
       );
       setState(() {
+        transcribedText = "";
+        feedback = null;
         expectedSentence = result['sentence'] ?? "";
       });
     } catch(e) {
       setState(() {
-        expectedSentence = "Error Loading Sentence";
+        expectedSentence = e.toString();
       });
     }
   }
@@ -42,6 +44,14 @@ class _PracticeScreenState extends State<PracticeScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     authProvider.logout();
     Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
+  }
+
+  Color _getScoreColor(dynamic score) {
+    final s = score is int ? score : int.tryParse(score.toString()) ?? 0;
+
+    if (s >= 80) return Colors.green;
+    if (s >= 50) return Colors.orange;
+    return Colors.red;
   }
 
   // Toggle recording and send audio to backend when stopped
@@ -98,7 +108,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Practice Speaking"),
+      appBar: AppBar(title: const Text("Practice Mode"),
       actions: [
         IconButton(
           icon: const Icon(Icons.logout),
@@ -109,49 +119,95 @@ class _PracticeScreenState extends State<PracticeScreen> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            IconButton(
+            Align (
+              alignment: Alignment.centerRight,
+              child: IconButton(
               icon: Icon(Icons.refresh),
               onPressed: fetchSentence,
             ),
+          ),
             // Expected sentence input
-            Text(
-              expectedSentence.isEmpty
-              ? "Loading sentence..."
-              : expectedSentence,
-              style: const TextStyle(fontSize:20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  expectedSentence.isEmpty
+                    ? "Loading sentence..."
+                    : expectedSentence,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
-            // Display transcript or instructions
-            Text(
-              transcribedText.isEmpty
-                  ? (isRecording ? "Recording..." : "Press mic and speak...")
-                  : transcribedText,
-              style: const TextStyle(fontSize: 20),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 30),
 
             // Feedback display
-            if (feedback != null) ...[
-              Text("Score: ${feedback!['score']}", style: const TextStyle(fontSize: 18)),
-              Text("Accuracy: ${feedback!['accuracy']}", style: const TextStyle(fontSize: 16)),
-              Text("Mistakes: ${feedback!['mistakes']}", style: const TextStyle(fontSize: 16)),
-              Text("Suggestion: ${feedback!['suggestion']}", style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 20),
-            ],
-
-            // Record button
-            FloatingActionButton(
-              onPressed: isLoading ? null : toggleRecording,
-              child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Icon(isRecording ? Icons.stop : Icons.mic),
-            ),
+            if (feedback != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
+                    title: const Text(
+                      "Practice Results",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      "Score: ${feedback!['score']}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: _getScoreColor(feedback!['score']),
+                      ),
+                    ),
+                    children: [
+                      ListTile(
+                        title: const Text("What you said:"),
+                        subtitle: Text(transcribedText),
+                      ),
+                      ListTile(
+                        title: const Text("Accuracy:"),
+                        subtitle: Text("${feedback!['accuracy']}"),
+                      ),
+                      ListTile(
+                        title: const Text("Mistakes:"),
+                        subtitle: Text("${feedback!['mistakes']}"),
+                      ),
+                      ListTile(
+                        title: const Text("Suggestion:"),
+                        subtitle: Text("${feedback!['suggestion']}"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
+
+    // Mic Button
+    floatingActionButton: FloatingActionButton(
+            onPressed: (isLoading || expectedSentence.isEmpty)
+              ? null
+              : toggleRecording,
+            child: isLoading
+              ? const CircularProgressIndicator(color: Colors.white)
+              : Icon(isRecording ? Icons.stop : Icons.mic),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

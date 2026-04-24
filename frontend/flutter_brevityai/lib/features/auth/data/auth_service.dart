@@ -4,7 +4,7 @@ class AuthService {
   Future<String?> login(String username, String password) async {
 
     try {
-      final response = await ApiService.post("/api/auth/login", {
+      final response = await ApiService.post("/auth/login", {
       "username": username,
       "password": password, 
       });
