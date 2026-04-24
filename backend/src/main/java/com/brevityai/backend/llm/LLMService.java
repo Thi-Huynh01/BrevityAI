@@ -5,7 +5,6 @@ import com.brevityai.backend.practice.dto.GenerationResult;
 import com.brevityai.backend.redis.RedisService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -88,6 +88,10 @@ public class LLMService {
 
     public GenerationResult generateSentence(String difficulty) throws IOException, InterruptedException {
         String randomSeed = UUID.randomUUID().toString();
+        List<String> sentences = redisService.getAllSentences()
+                .stream()
+                .limit(20)
+                .toList();
 
         String requestBody = """
         {
@@ -101,11 +105,11 @@ public class LLMService {
             },
             {
               "role": "user",
-              "content": "Seed: %s. Generate a Vietnamese sentence that is %s difficulty. Each response MUST be unique and different from previous ones. Vary topic, vocabulary, and structure. Use topics like food, travel, emotions, daily life, school, work, and hobbies. Return ONLY valid JSON in this format: { \\"sentence\\": \\"Vietnamese sentence\\", \\"translation\\": \\"English translation\\" }"
+              "content": "Seed: %s. Generate a Vietnamese sentence that is %s difficulty. Avoid generating sentences similar to these: [%s]. Each response MUST be unique and different. When generating feedback, write it as though they are speaking, NOT writing: Don't mention spelling, instead mention speaking. Vary topic, vocabulary, and structure. Use topics like food, travel, emotions, daily life, school, work, and hobbies. Return ONLY valid JSON in this format: { \\"sentence\\": \\"Vietnamese sentence\\", \\"translation\\": \\"English translation\\" }"
             }
           ]
         }
-        """.formatted(randomSeed, difficulty);
+        """.formatted(randomSeed, sentences, difficulty);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/chat/completions"))
@@ -143,13 +147,11 @@ public class LLMService {
         result.setActualSentence(feedback.get("sentence").asText());
         result.setTranslated(feedback.get("translation").asText());
 
-
         return result;
     }
 
     public GenerationResult generateUniqueSentence(String difficulty) throws Exception {
         GenerationResult result;
-
         do {
             result = generateSentence(difficulty);
         } while (redisService.isDuplicate(result.getActualSentence()));

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @Data
@@ -27,6 +28,10 @@ public class RedisService {
 
         // expire after 24 hours to prevent memory issues
         redisTemplate.expire(key, Duration.ofHours(24));
+    }
+
+    public Set<String> getAllSentences() {
+        return redisTemplate.opsForSet().members("sentences");
     }
 
     private String normalize(String sentence) {
