@@ -5,6 +5,7 @@ import com.brevityai.backend.practice.dto.GenerationResult;
 import com.brevityai.backend.redis.RedisService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -18,11 +19,12 @@ import java.util.UUID;
 @Service
 public class LLMService {
 
-    private final String apiKey = System.getenv("OPENAI_API_KEY");
-
+    private final String apiKey;
+    //private final String apiKey = System.getenv("OPENAI_API_KEY");
     private final RedisService redisService;
 
-    public LLMService(RedisService redisService) {
+    public LLMService(@Value("${openai.api.key}") String apiKey, RedisService redisService) {
+        this.apiKey = apiKey;
         this.redisService = redisService;
     }
 

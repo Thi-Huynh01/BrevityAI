@@ -2,6 +2,7 @@ package com.brevityai.backend.auth.jwt;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
@@ -11,11 +12,15 @@ import java.util.Date;
 
 @Service
 public class JWTService {
+    private final String jwtSecret;
+    //private final String JWT_SECRET = System.getenv("JWT_SECRET");
 
-    private final String JWT_SECRET = System.getenv("JWT_SECRET");
+    public JWTService(@Value("${jwt.secret}") String jwtSecret) {
+        this.jwtSecret = jwtSecret;
+    }
 
     private Key getKey() {
-        return Keys.hmacShaKeyFor(JWT_SECRET.getBytes());
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
     public String generateToken(String username) {
