@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget{
           onPressed: () async {
           Navigator.pushReplacementNamed(context, '/practice');
         },
-          child: const Text("practice"),
+          child: const Text("Practice Mode"),
         ),
       )
     );

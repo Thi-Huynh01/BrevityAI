@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_brevityai/features/auth/presentation/screens/login_screen.dart';
+import 'package:flutter_brevityai/features/auth/presentation/screens/register_screen.dart';
 import 'package:flutter_brevityai/features/practice/presentation/screens/practice_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
+        '/register':(context) => const RegisterScreen(),
         '/home':(context) => const HomeScreen(),
         '/practice':(context) => const PracticeScreen(),
       },

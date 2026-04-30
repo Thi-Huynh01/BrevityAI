@@ -13,20 +13,26 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User register (String username, String password) {
+    public void register (String username, String email, String password) {
+
+        if (userRepository.findByEmail(email).isPresent())
+            throw new RuntimeException("Email address already in use");
 
         if (userRepository.findByUsername(username).isPresent())
-            throw new RuntimeException("Username already taken");
+            throw new RuntimeException("Username is already taken");
+
+
 
         User user = new User();
+        user.setEmail(email);
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole("USER");
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
-    public User login(String username, String password) {
+    public void login(String username, String password) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -34,11 +40,6 @@ public class AuthService {
             throw new RuntimeException("Invalid password");
         }
 
-//        if (userRepository.findByUsername(username).isEmpty() ||
-//                !passwordEncoder.matches(password, user.getPassword()))
-//            throw new RuntimeException("Username or password is invalid");
-
-        return user;
     }
 
 }

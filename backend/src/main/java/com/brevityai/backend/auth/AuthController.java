@@ -1,10 +1,13 @@
 package com.brevityai.backend.auth;
 
 import com.brevityai.backend.auth.dto.AuthRequest;
+import com.brevityai.backend.auth.dto.RegisterRequest;
 import com.brevityai.backend.auth.jwt.JWTService;
 import com.brevityai.backend.user.User;
 import com.brevityai.backend.user.UserRepository;
 import lombok.AllArgsConstructor;
+import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,32 +24,34 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-    private final JWTService jWTService;
-    private final UserRepository userRepository;
-    private final PasswordEncoder encoder;
+    private final JWTService jwtService;
 
     // Register endpoint
     @PostMapping("/register")
-    public User register(@RequestBody Map<String, String> body) {
-        return authService.register(
-                body.get("username"),
-                body.get("password")
-        );
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        try {
+            authService.register(
+                    request.username,
+                    request.email,
+                    request.password
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "User created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+
     }
 
+    // Login endpoint
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!encoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+        try {
+            authService.login(request.getUsername(), request.getPassword());
+            return ResponseEntity.ok(Map.of("token", jwtService.generateToken(request.getUsername())));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("Error", e.getMessage()));
         }
-
-        String token = jWTService.generateToken(user.getUsername());
-
-        return ResponseEntity.ok(Map.of("token", token));
-
     }
 }

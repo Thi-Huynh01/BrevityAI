@@ -4,40 +4,28 @@ import '../../provider/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
-
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
+
   final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();  
+  final TextEditingController confirmController = TextEditingController();
 
-/*
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
 
-      final message = ModalRoute.of(context)?.settings.arguments;
-
-      if (message != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message.toString())),
-          );
-        });
-      }
-    }
-*/
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
  return Scaffold(
+  resizeToAvoidBottomInset: true,
   body: Container(
     width: double.infinity,
     decoration: BoxDecoration(
@@ -94,22 +82,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     topRight: Radius.circular(60),
                   ),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.all(30),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    left: 30,
+                    right: 30,
+                    top:30,
+                    bottom: MediaQuery.of(context).viewInsets.bottom + 30,
+                    ),
                   child: Column(
                     children: <Widget>[
                       SizedBox(height: 10),
                       FadeInUp(duration: Duration(milliseconds: 1000), 
-                      child: Text("Welcome Back!", 
+                      child: Text("Welcome to Viet Lingua", 
                       style: TextStyle(
                         color: Colors.grey.shade500, 
-                        fontSize: 40
+                        fontSize: 30
                         ),
                       )
                     ),
                       SizedBox(height: 10,),
                       FadeInUp(duration: Duration(milliseconds: 1300), 
-                      child: Text("Login", 
+                      child: Text("Create Your Account", 
                       style: TextStyle(
                         color: Colors.grey.shade500, 
                         fontSize: 25
@@ -143,11 +136,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 child: TextField(
-                                  controller: usernameController,
+                                  controller: emailController,
                                   decoration: InputDecoration(
-                                    hintText: "Username",
+                                    hintText: "Email Address",
                                     hintStyle: TextStyle(color: Colors.grey),
-                                    prefixIcon: Icon(Icons.person),
+                                    prefixIcon: Icon(Icons.email),
                                     border: InputBorder.none,
                                   ),
                                 ),
@@ -162,12 +155,52 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 child: TextField(
+                                  controller: usernameController,
+                                  decoration: InputDecoration(
+                                    hintText: "Username",
+                                    hintStyle: TextStyle(color: Colors.grey),
+                                    prefixIcon: Icon(Icons.person),
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                            Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: Colors.grey.shade200,
+                                    ),
+                                  ),
+                                ),
+                                child: TextField(
                                   controller: passwordController,
                                   obscureText: true,
                                   decoration: InputDecoration(
                                     hintText: "Password",
                                     hintStyle: TextStyle(color: Colors.grey),
-                                    prefixIcon: Icon(Icons.lock_rounded),
+                                    prefixIcon: Icon(Icons.lock),
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                            Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: Colors.grey.shade200,
+                                    ),
+                                  ),
+                                ),
+                                child: TextField(
+                                  controller: confirmController,
+                                  obscureText: true,
+                                  decoration: InputDecoration(
+                                    hintText: "Confirm Password",
+                                    hintStyle: TextStyle(color: Colors.grey),
+                                    prefixIconColor: Colors.red,
+                                    prefixIcon: Icon(Icons.lock_outline),
                                     border: InputBorder.none,
                                   ),
                                 ),
@@ -179,24 +212,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: 40),
                       FadeInUp(
                         duration: Duration(milliseconds: 1500),
-                        child: Text(
-                          "Forgot Password?",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      FadeInUp(
-                        duration: Duration(milliseconds: 1500),
                         child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context,'/register');
-                          },
-                          child: Text(
-                            "Don't have an account?",
-                            style: TextStyle(color: Colors.grey),
-                          ),
+                            onTap: () {
+                                Navigator.pushNamed(context, '/login');
+                            },
+                        child: Text(
+                        "Already Have An Account?",
+                        style: TextStyle(color: Colors.grey),
                         ),
                       ),
+                    ),
+                      
                       SizedBox(height: 20),
                       FadeInUp(
                         duration: Duration(milliseconds: 1600),
@@ -204,20 +230,29 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: authProvider.isLoading
                               ? null
                               : () async {
-                                  final success = await authProvider.login(
+                                 final status = await authProvider.register(
                                     usernameController.text,
+                                    emailController.text,
                                     passwordController.text,
+                                    confirmController.text,
                                   );
+                                  if (status == "User created successfully") {
+                                    
+                                    //Navigator.pushReplacementNamed(context,'/login');
 
-                                  if (success) {
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      '/home',
-                                    );
-                                  } else {
+                                    
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text("Username or password is incorrect"),
+                                        content: Text("Account successfully created"),
+                                      ),
+                                    );
+                                  
+                                    //await Future.delayed(Duration(seconds:2));
+                                    Navigator.pushReplacementNamed(context,'/login');
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                       SnackBar(
+                                        content: Text(status),
                                       ),
                                     );
                                   }
@@ -229,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Center(
                             child: Text(
-                              "Login",
+                              "Create Account",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,

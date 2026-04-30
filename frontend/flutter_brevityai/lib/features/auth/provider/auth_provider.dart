@@ -22,6 +22,27 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<String> register(String username, String email, String password, String confirm) async {
+    isLoading = true;
+    notifyListeners();
+
+    if (password != confirm) {
+      isLoading = false;
+      return "Passwords do not match";
+    }
+    
+    final result = await _authService.register(username, email, password);
+/*
+    if (result == "success") {
+      notifyListeners();
+      return true;
+    }
+*/  
+    isLoading = false;
+    notifyListeners();
+    return result.toString();
+  }
+
   Future<bool> login(String username, String password) async {
     isLoading = true;
     notifyListeners();

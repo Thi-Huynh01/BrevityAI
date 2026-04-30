@@ -34,6 +34,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
         expectedSentence = result['sentence'] ?? "";
       });
     } catch(e) {
+      print("Error: $e");
       setState(() {
         expectedSentence = e.toString();
       });
