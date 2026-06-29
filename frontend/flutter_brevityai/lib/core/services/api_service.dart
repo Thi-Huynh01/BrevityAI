@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   //static const String baseURL = "https://brevityai-production.up.railway.app/api";
-  static const String baseURL = "http://192.168.1.212:8080/api";
-  //static const String baseURL = "http://192.168.1.20:8080/api";
+  static const String baseURL = "http://192.168.1.212:8080/api"; //pt
+  //static const String baseURL = "http://192.168.1.20:8080/api"; //home
 
   static Future<Map<String, dynamic>> post (
     String endpoint, Map<String, dynamic> data) async {
@@ -13,7 +13,8 @@ class ApiService {
         headers: {"Content-Type":"application/json"},
         body: jsonEncode(data),
       );
-/*
+      
+      /*
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {

@@ -1,8 +1,38 @@
 version: '3.8'
 
 services:
+
+  backend:
+    build: ./backend
+    container_name: vietlingua-spring-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASS: ${DATABASE_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      REDIS_URL: ${REDIS_URL}
+  postgres:
+    image: postgres:17
+    container_name: vietlingua-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   redis:
     image: redis:7
-    container_name: my-redis
+    container_name: vietlingua-redis
     ports:
-       - "6379:6379"
+      - "6379:6379"
+volumes:
+  pgdata:

@@ -217,7 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 Navigator.pushNamed(context, '/login');
                             },
                         child: Text(
-                        "Already Have An Account?",
+                        "Already Have An Account? Tap here to log in",
                         style: TextStyle(color: Colors.grey),
                         ),
                       ),
